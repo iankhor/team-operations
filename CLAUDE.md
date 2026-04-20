@@ -63,6 +63,16 @@ Before implementing anything non-trivial:
 
 Do not start a new phase (or mix work across phases) without updating `docs/tasks.md` first. If the user asks for a change mid-phase, update the plan in-file rather than silently expanding scope.
 
+## Code style
+
+How we write and evaluate code in this repo:
+
+- **Clean and explicit over clever.** Code should read like plain English. Prefer long descriptive identifiers over short cryptic ones. Abstractions are welcome — *when they're earned* by real, repeated use and they make the calling code clearer, not just shorter. A good abstraction hides complexity a reader doesn't need; a bad one just adds a layer to step through.
+- **YAGNI.** Build for the task in front of you, not for hypothetical futures. No speculative parameters, flags, or hooks "in case we need them later". No generic helper for a single caller. When the second caller appears, *then* abstract — not before.
+- **KISS.** Pick the simplest design that solves the current problem. Three similar lines is better than a premature abstraction. Reach for frameworks, classes, and layers only when the simpler version has a concrete, present-day pain point.
+- **Minimal comments.** If code needs a comment to explain *what* it does, rename the identifiers instead. Only add a comment when the *why* is non-obvious — a hidden constraint, a subtle invariant, a workaround for a specific bug, or behaviour that would surprise a reader. Never write comments that restate the code, reference the current task/PR, or explain "what we used to do".
+- **Delete, don't deprecate.** No dead branches, no `// removed`/`// legacy` markers, no re-exports kept for nothing. If the feature is gone, so is its code.
+
 ## Repository layout
 
 **Colocation principle: each automation lives in its own top-level folder, containing everything specific to it.** That means the automation's code, config, YAML/JSON data, README, and tests all sit together (e.g. `champions-notifier/`). Anyone who opens the folder should see the whole automation at a glance.
