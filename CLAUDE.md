@@ -41,6 +41,17 @@ After `bun add`, rebuild (`docker compose build`) so future containers start wit
 
 Lockfile is `bun.lockb` (binary — do not hand-edit). Commit it.
 
+## Planning: phases and `docs/tasks.md`
+
+Work in this repo is executed in **phases**, and every phase is planned in [`docs/tasks.md`](docs/tasks.md) *before* code is written.
+
+Before implementing anything non-trivial:
+1. Open `docs/tasks.md` and add a new `## Phase N — <title>` section using the template at the top of that file.
+2. Fill in **Goal**, **Scope**, and the **Tasks** checklist. Confirm the plan with the user.
+3. Only then start coding. Tick tasks as they land; flip **Status** when the phase moves.
+
+Do not start a new phase (or mix work across phases) without updating `docs/tasks.md` first. If the user asks for a change mid-phase, update the plan in-file rather than silently expanding scope.
+
 ## Repository layout
 
 Single root `package.json`. Keep it that way until there's a concrete reason to split into a monorepo.
