@@ -23,23 +23,34 @@ Toolchain:
 
 ## Common commands
 
-Run everything via `docker compose run --rm app …`:
+A root `Makefile` wraps the verbose `docker compose run --rm app …` pattern. **Prefer `make` targets** for anything defined there; fall back to raw `docker compose` only for one-offs.
 
 ```bash
-docker compose build                           # build/rebuild the image (after Dockerfile or dep changes)
-docker compose run --rm app bun install        # install deps
-docker compose run --rm app bun add <pkg>      # add a runtime dep
-docker compose run --rm app bun add -d <pkg>   # add a dev dep
-docker compose run --rm app bun run <script>   # run a package.json script
-docker compose run --rm app bun <file.js>      # execute a JS file
-docker compose run --rm app bun test           # run tests
-docker compose run --rm app bun test <path>    # run a single test file
-docker compose run --rm app sh                 # interactive shell in the container
+make                           # show all available targets
+make build                     # build/rebuild the Docker image (after Dockerfile or dep changes)
+make install                   # install deps and write bun.lock on the host
+make test                      # run all tests
+make shell                     # interactive shell in the container
+
+make champion-notifier-dry     # dry-run the champions notifier (no POST, no state write)
+make champion-notifier-force   # force a rotation right now (needs TEAMS_WEBHOOK_URL)
+make champion-notifier         # normal run (respects the 14-day gate)
 ```
 
-After `bun add`, rebuild (`docker compose build`) so future containers start with the new dep baked into the image, not just the bind-mounted `node_modules`.
+For anything the Makefile doesn't cover:
 
-Lockfile is `bun.lockb` (binary — do not hand-edit). Commit it.
+```bash
+docker compose run --rm app bun add <pkg>     # add a runtime dep (then `make build`)
+docker compose run --rm app bun add -d <pkg>  # add a dev dep
+docker compose run --rm app bun <file.js>     # execute an arbitrary file
+docker compose run --rm app bun test <path>   # run a single test file
+```
+
+After any `bun add`, run `make build` so future containers start with the new dep baked into the image.
+
+Lockfile is `bun.lock`. Commit it.
+
+**When adding a new automation, add its targets to the root `Makefile`** (namespaced with the automation's name — see the `champion-notifier*` targets as a template).
 
 ## Planning: phases and `docs/tasks.md`
 
@@ -54,7 +65,22 @@ Do not start a new phase (or mix work across phases) without updating `docs/task
 
 ## Repository layout
 
-Single root `package.json`. Keep it that way until there's a concrete reason to split into a monorepo.
+**Colocation principle: each automation lives in its own top-level folder, containing everything specific to it.** That means the automation's code, config, YAML/JSON data, README, and tests all sit together (e.g. `champions-notifier/`). Anyone who opens the folder should see the whole automation at a glance.
+
+What stays at the root (shared across automations, not duplicated per folder):
+
+- `Dockerfile`, `docker-compose.yml`, `.dockerignore` — one Bun runtime image serves every automation
+- `package.json`, `bun.lock` — one dependency graph; per-automation scripts are namespaced (e.g. `"champion-notifier"`, `"champion-notifier:dry"`)
+- `.github/workflows/` — GitHub requires workflows at this path; one file per automation, named after it
+- `CLAUDE.md`, `.gitignore`, `docs/` — repo-wide
+
+When adding a new automation:
+1. Create a new top-level folder named after the automation.
+2. Put its code, README, config, and tests inside.
+3. Add scripts to the root `package.json` namespaced with the automation name.
+4. Add a dedicated workflow file at `.github/workflows/<automation>.yml`.
+
+If an automation ever needs a different runtime (Python, Go, etc.), that's when we split infra — until then, shared root infra is the default.
 
 ## Conventions to capture over time
 

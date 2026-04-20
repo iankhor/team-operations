@@ -1,0 +1,64 @@
+name: Champions notifier
+
+on:
+  schedule:
+    # 23:00 UTC Sunday ~= 09:00 AEST (winter) / 10:00 AEDT (summer) Monday in Melbourne.
+    # Script enforces a 14-day gate, so running weekly is safe.
+    - cron: '0 23 * * 0'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no POST, no state write)'
+        type: boolean
+        default: false
+      force:
+        description: 'Force rotation even if <14 days since last'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker compose build
+
+      - name: Run notifier
+        id: notify
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          FLAGS=""
+          [ "${DRY_RUN}" = "true" ] && FLAGS="$FLAGS --dry-run"
+          [ "${FORCE}" = "true" ]   && FLAGS="$FLAGS --force"
+          docker compose run --rm \
+            -e TEAMS_WEBHOOK_URL \
+            -e GITHUB_OUTPUT=/app/.github_output \
+            -v "${GITHUB_OUTPUT}:/app/.github_output" \
+            app bun run champions-notifier/index.js $FLAGS
+
+      - name: Fix workspace ownership
+        if: always()
+        run: sudo chown -R "$USER:$USER" .
+
+      - name: Commit state update
+        if: inputs.dry_run != true && steps.notify.outputs.new_champion != ''
+        env:
+          NEW_CHAMPION: ${{ steps.notify.outputs.new_champion }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet champions-notifier/champions.yml; then
+            echo "No state change — nothing to commit."
+            exit 0
+          fi
+          git add champions-notifier/champions.yml
+          git commit -m "chore(champion): rotate to ${NEW_CHAMPION}"
+          git push

@@ -6,5 +6,13 @@
   "type": "module",
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "scripts": {
+    "champion-notifier": "bun run champions-notifier/index.js",
+    "champion-notifier:dry": "bun run champions-notifier/index.js --dry-run",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "yaml": "^2.4.5"
   }
 }

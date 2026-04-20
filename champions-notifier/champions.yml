@@ -1,0 +1,11 @@
+champions:
+  - name: Ian Khor
+    upn: KhorI@redcat.com.au
+  - name: Juelv Cayago
+    upn: CayagoJ@redcat.com.au
+  - name: Richard Sims
+    upn: SimsR@redcat.com.au
+  - name: Rhyme Bulbul
+    upn: BulbulR@redcat.com.au
+last_champion: null
+last_rotated_at: null
