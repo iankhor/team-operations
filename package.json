@@ -1,0 +1,10 @@
+{
+  "name": "data-ai-team-operations",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Automation for the Redcat Data & AI team",
+  "type": "module",
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
