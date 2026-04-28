@@ -88,11 +88,12 @@ Goal: an HTTP-triggered Flow that receives the JSON above and posts a nicely-for
 
 8. Add a **Condition**: `triggerBody()?['previousChampion']` **is not equal to** `null`.
 
-9. In the **If yes** branch, add **Post message in a chat or channel**:
+9. In the **If yes** branch, add **Reply with a message in a channel**:
    - **Post as:** Flow bot
    - **Post in:** Channel
    - **Team:** `Product Development & IT Infrastructure`
    - **Channel:** `Data and AI Team`
+   - **Message ID:** `1776753578605` (the shared automations thread — see `CLAUDE.md` → *Teams notifications*)
    - **Message** (set Format = HTML):
      ```html
      🔥 <strong>Champion baton-pass!</strong><br>
@@ -102,7 +103,7 @@ Goal: an HTTP-triggered Flow that receives the JSON above and posts a nicely-for
      <strong>@{triggerBody()?['periodEnd']}</strong>. Go cause some good trouble. 🏆
      ```
 
-10. In the **If no** branch (first run, no previous champion), add **Post message in a chat or channel** with the same Post as / Post in / Team / Channel, and message:
+10. In the **If no** branch (first run, no previous champion), add **Reply with a message in a channel** with the same Post as / Post in / Team / Channel / Message ID, and message:
     ```html
     🏆 <strong>First Champion of the rotation!</strong><br>
     @{outputs('nextMention')?['body/atMention']} — you're up from

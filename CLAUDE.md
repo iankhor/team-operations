@@ -92,6 +92,10 @@ When adding a new automation:
 
 If an automation ever needs a different runtime (Python, Go, etc.), that's when we split infra — until then, shared root infra is the default.
 
+## Teams notifications
+
+All automations post into the **same Teams thread** in `#Data and AI Team` (Team: `Product Development & IT Infrastructure`), parent message ID **`1776753578605`**. In Power Automate, use **Reply with a message in a channel** (not **Post message in a chat or channel**) and set **Message ID** to that parent ID. Keeps automation chatter threaded under one anchor instead of cluttering the channel top-level.
+
 ## Conventions to capture over time
 
 As patterns emerge, update this file with:
